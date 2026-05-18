@@ -422,18 +422,27 @@ function updateRanking() {
     const rankingData = state.submissions.map(sub => {
         let points = 0;
         let perfectMatches = 0;
+        let partialMatches = 0;
+        let misses = 0;
         const subM = sub.prediction.matches;
         
         Object.keys(realM).forEach(matchId => {
-            if (realM[matchId].winner && subM[matchId] && subM[matchId].winner) {
-                if (realM[matchId].winner.name === subM[matchId].winner.name) {
-                    if (realM[matchId].score1 === subM[matchId].score1 && 
-                        realM[matchId].score2 === subM[matchId].score2) {
-                        points += 2; // Exacto = 2 pts
-                        perfectMatches += 1;
+            if (realM[matchId].winner) {
+                if (subM[matchId] && subM[matchId].winner) {
+                    if (realM[matchId].winner.name === subM[matchId].winner.name) {
+                        if (realM[matchId].score1 === subM[matchId].score1 && 
+                            realM[matchId].score2 === subM[matchId].score2) {
+                            points += 2; // Exacto = 2 pts
+                            perfectMatches += 1;
+                        } else {
+                            points += 1; // Solo Ganador = 1 pt
+                            partialMatches += 1;
+                        }
                     } else {
-                        points += 1; // Solo Ganador = 1 pt
+                        misses += 1;
                     }
+                } else {
+                    misses += 1;
                 }
             }
         });
@@ -443,7 +452,9 @@ function updateRanking() {
             email: sub.email,
             country: sub.country || 'OTRO',
             points: points,
-            perfect: perfectMatches
+            perfect: perfectMatches,
+            partial: partialMatches,
+            misses: misses
         };
     });
     
@@ -463,16 +474,30 @@ function updateRanking() {
         const flag = flagMap[row.country] || '🏳️';
         
         tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${flag} ${row.nick}</td>
-            <td>${row.points} pts <small style="opacity: 0.6;">(${row.perfect} perfectos)</small></td>
+            <td style="font-size: 1.5rem; font-weight: bold; width: 60px;">#${index + 1}</td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${flag}</span>
+                    <span style="font-size: 1.5rem; font-family: 'Teko', sans-serif; letter-spacing: 1px;">${row.nick}</span>
+                </div>
+            </td>
+            <td style="text-align: center;">
+                <span style="background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0,255,0,0.3); color: #4caf50; padding: 0.4rem 1rem; border-radius: 8px; font-weight: bold; font-size: 1.3rem;">${row.perfect}</span>
+            </td>
+            <td style="text-align: center;">
+                <span style="background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255,215,0,0.3); color: #ffd700; padding: 0.4rem 1rem; border-radius: 8px; font-weight: bold; font-size: 1.3rem;">${row.partial}</span>
+            </td>
+            <td style="text-align: center;">
+                <span style="background: rgba(255, 76, 76, 0.15); border: 1px solid rgba(255,76,76,0.3); color: #ff4c4c; padding: 0.4rem 1rem; border-radius: 8px; font-weight: bold; font-size: 1.3rem;">${row.misses}</span>
+            </td>
+            <td style="text-align: right; font-size: 2.2rem; font-family: 'Teko', sans-serif; color: var(--primary); text-shadow: 0 0 10px rgba(102, 252, 241, 0.4);">${row.points}</td>
         `;
         tbody.appendChild(tr);
     });
     
     if (rankingData.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="3" style="text-align: center; opacity: 0.5;">No hay predicciones subidas todavía.</td>`;
+        tr.innerHTML = `<td colspan="6" style="text-align: center; opacity: 0.5;">No hay predicciones subidas todavía.</td>`;
         tbody.appendChild(tr);
     }
     
