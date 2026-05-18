@@ -131,6 +131,17 @@ function openScoreModal(matchId, isReal) {
         optionsContainer.appendChild(btn);
     }
     
+    if (match.winner) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'score-btn';
+        clearBtn.style.background = 'var(--danger)';
+        clearBtn.style.gridColumn = '1 / -1';
+        clearBtn.style.marginTop = '0.5rem';
+        clearBtn.textContent = 'Borrar Resultado';
+        clearBtn.onclick = () => clearScore(matchId, isReal);
+        optionsContainer.appendChild(clearBtn);
+    }
+    
     document.getElementById('score-modal').classList.remove('hidden');
 }
 
@@ -140,6 +151,14 @@ function closeScoreModal() {
 }
 
 document.getElementById('btn-close-modal').onclick = closeScoreModal;
+
+function clearScore(matchId, isReal) {
+    const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
+    clearDownstream(currentMatches, matchId);
+    saveState();
+    renderBracket(isReal ? 'real-bracket' : 'user-bracket', isReal);
+    closeScoreModal();
+}
 
 function setScore(s1, s2, isReal) {
     const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
