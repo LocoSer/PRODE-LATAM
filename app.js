@@ -450,7 +450,7 @@ function updateRanking() {
     rankingData.sort((a, b) => b.points - a.points);
     
     const flagMap = {
-        'AR': '🇦🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'MX': '🇲🇽', 
+        'AR': '🇦🇷', 'BR': '🇧🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'MX': '🇲🇽', 
         'PE': '🇵🇪', 'UY': '🇺🇾', 'VE': '🇻🇪', 'ES': '🇪🇸', 'US': '🇺🇸', 'OTRO': '🏳️'
     };
     
