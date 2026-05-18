@@ -45,7 +45,6 @@ const roundsLayout = [
 ];
 
 let state = {
-    mode: 'user', 
     user: { nick: '', email: '' },
     prediction: JSON.parse(JSON.stringify(initialStructure)),
     realResults: JSON.parse(JSON.stringify(initialStructure)),
@@ -98,8 +97,8 @@ function clearDownstream(matches, matchId) {
 }
 
 // Open Modal for match score
-function openScoreModal(matchId) {
-    const currentMatches = state.mode === 'user' ? state.prediction.matches : state.realResults.matches;
+function openScoreModal(matchId, isReal) {
+    const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
     const match = currentMatches[matchId];
     
     if (!match.p1 || !match.p2) return; // Cannot play if players are undefined
@@ -119,7 +118,7 @@ function openScoreModal(matchId) {
         const btn = document.createElement('button');
         btn.className = 'score-btn p1-wins';
         btn.textContent = `${requiredWins} - ${loserScore}`;
-        btn.onclick = () => setScore(requiredWins, loserScore);
+        btn.onclick = () => setScore(requiredWins, loserScore, isReal);
         optionsContainer.appendChild(btn);
     }
     
@@ -128,7 +127,7 @@ function openScoreModal(matchId) {
         const btn = document.createElement('button');
         btn.className = 'score-btn p2-wins';
         btn.textContent = `${loserScore} - ${requiredWins}`;
-        btn.onclick = () => setScore(loserScore, requiredWins);
+        btn.onclick = () => setScore(loserScore, requiredWins, isReal);
         optionsContainer.appendChild(btn);
     }
     
@@ -142,8 +141,8 @@ function closeScoreModal() {
 
 document.getElementById('btn-close-modal').onclick = closeScoreModal;
 
-function setScore(s1, s2) {
-    const currentMatches = state.mode === 'user' ? state.prediction.matches : state.realResults.matches;
+function setScore(s1, s2, isReal) {
+    const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
     const match = currentMatches[currentModalMatchId];
     
     const newWinner = s1 > s2 ? match.p1 : match.p2;
@@ -170,15 +169,16 @@ function setScore(s1, s2) {
     }
     
     saveState();
-    renderBracket();
+    renderBracket(isReal ? 'real-bracket' : 'user-bracket', isReal);
     closeScoreModal();
 }
 
-function renderBracket() {
-    const container = document.getElementById('bracket');
+function renderBracket(containerId, isReal) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
     container.innerHTML = '';
     
-    const currentMatches = state.mode === 'user' ? state.prediction.matches : state.realResults.matches;
+    const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
 
     roundsLayout.forEach(round => {
         const roundDiv = document.createElement('div');
@@ -206,7 +206,7 @@ function renderBracket() {
             matchDiv.className = 'match';
             // Open modal on click instead of direct win
             matchDiv.style.cursor = 'pointer';
-            matchDiv.onclick = () => openScoreModal(matchId);
+            matchDiv.onclick = () => openScoreModal(matchId, isReal);
 
             // P1
             const p1Div = document.createElement('div');
@@ -265,11 +265,28 @@ function renderBracket() {
     });
 }
 
+// Navigation Logic
 document.getElementById('btn-prediccion').onclick = () => {
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('btn-prediccion').classList.add('active');
     document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
     document.getElementById('view-prediccion').classList.remove('hidden');
+    renderBracket('user-bracket', false);
+};
+
+document.getElementById('btn-real-results').onclick = () => {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('btn-real-results').classList.add('active');
+    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+    document.getElementById('view-real-results').classList.remove('hidden');
+    renderBracket('real-bracket', true);
+};
+
+document.getElementById('btn-premios').onclick = () => {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('btn-premios').classList.add('active');
+    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+    document.getElementById('view-premios').classList.remove('hidden');
 };
 
 document.getElementById('btn-ranking').onclick = () => {
@@ -278,13 +295,6 @@ document.getElementById('btn-ranking').onclick = () => {
     document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
     document.getElementById('view-ranking').classList.remove('hidden');
     updateRanking();
-};
-
-document.getElementById('btn-premios').onclick = () => {
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btn-premios').classList.add('active');
-    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
-    document.getElementById('view-premios').classList.remove('hidden');
 };
 
 document.getElementById('btn-admin').onclick = () => {
@@ -323,21 +333,6 @@ document.getElementById('btn-download').onclick = () => {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-};
-
-document.getElementById('btn-toggle-real-results').onclick = () => {
-    if (state.mode === 'user') {
-        state.mode = 'admin';
-        document.body.classList.add('admin-mode');
-        document.getElementById('btn-toggle-real-results').textContent = 'Terminar Edición de Resultados';
-        document.getElementById('btn-prediccion').click();
-    } else {
-        state.mode = 'user';
-        document.body.classList.remove('admin-mode');
-        document.getElementById('btn-toggle-real-results').textContent = 'Modificar Resultados Reales';
-        document.getElementById('btn-admin').click();
-    }
-    renderBracket();
 };
 
 document.getElementById('file-predictions').addEventListener('change', function(e) {
@@ -384,13 +379,15 @@ document.getElementById('btn-clear-db').onclick = () => {
         document.getElementById('user-nick').value = '';
         document.getElementById('user-email').value = '';
         document.getElementById('upload-status').textContent = '';
-        renderBracket();
+        renderBracket('user-bracket', false);
+        renderBracket('real-bracket', true);
         updateRanking();
     }
 };
 
 function updateRanking() {
     const tbody = document.getElementById('ranking-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     const realM = state.realResults.matches;
@@ -402,15 +399,13 @@ function updateRanking() {
         
         Object.keys(realM).forEach(matchId => {
             if (realM[matchId].winner && subM[matchId] && subM[matchId].winner) {
-                // Si acierta el ganador suma 1 punto
                 if (realM[matchId].winner.name === subM[matchId].winner.name) {
-                    points += 1;
-                    
-                    // Si además acierta el resultado exacto suma 2 puntos extra (Total: 3)
                     if (realM[matchId].score1 === subM[matchId].score1 && 
                         realM[matchId].score2 === subM[matchId].score2) {
-                        points += 2;
+                        points += 2; // Exacto = 2 pts
                         perfectMatches += 1;
+                    } else {
+                        points += 1; // Solo Ganador = 1 pt
                     }
                 }
             }
@@ -450,5 +445,6 @@ function updateRanking() {
 
 // Init
 loadState();
-renderBracket();
+renderBracket('user-bracket', false);
+renderBracket('real-bracket', true);
 updateRanking();

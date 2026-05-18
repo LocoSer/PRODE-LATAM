@@ -14,6 +14,7 @@
         </div>
         <nav>
             <button id="btn-prediccion" class="nav-btn active">Mi Predicción</button>
+            <button id="btn-real-results" class="nav-btn" style="color: var(--accent);">Resultados Reales</button>
             <button id="btn-premios" class="nav-btn">Premios</button>
             <button id="btn-ranking" class="nav-btn">Ranking</button>
             <button id="btn-admin" class="nav-btn">Admin</button>
@@ -34,13 +35,25 @@
         </section>
 
         <div class="bracket-scroll-container">
-            <section class="bracket-container" id="bracket">
+            <section class="bracket-container" id="user-bracket">
                 <!-- Bracket will be injected here via JS -->
             </section>
         </div>
 
         <div class="actions">
             <button id="btn-download" class="cta-button">📥 Descargar Mi Predicción</button>
+        </div>
+    </main>
+
+    <main id="view-real-results" class="hidden">
+        <section class="intro">
+            <h2 style="color: var(--accent);">Resultados Reales del Torneo</h2>
+            <p>Cuadro oficial de la administración. Lo que cargues aquí modificará directamente la tabla del ranking.</p>
+        </section>
+        <div class="bracket-scroll-container">
+            <section class="bracket-container" id="real-bracket">
+                <!-- Bracket will be injected here via JS -->
+            </section>
         </div>
     </main>
 
@@ -58,12 +71,6 @@
                         <input type="file" id="file-predictions" multiple accept=".json">
                     </label>
                     <div id="upload-status"></div>
-                </div>
-                
-                <div class="admin-card">
-                    <h3>2. Resultados Reales</h3>
-                    <p>Activa el modo administrador para cargar los resultados reales del torneo en el bracket principal y así calcular el ranking.</p>
-                    <button id="btn-toggle-real-results" class="secondary-button">Modificar Resultados Reales</button>
                 </div>
             </div>
 
