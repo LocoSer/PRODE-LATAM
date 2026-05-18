@@ -370,7 +370,8 @@ document.getElementById('file-predictions').addEventListener('change', function(
 });
 
 document.getElementById('btn-clear-db').onclick = () => {
-    if (confirm("¡ATENCIÓN! Esto borrará todas las predicciones subidas, resultados reales y tu predicción actual. ¿Estás seguro?")) {
+    const userInput = prompt("¡PELIGRO! Vas a borrar TODA la base de datos (predicciones, usuarios y ranking).\n\nPara confirmar esta acción, escribe exactamente la palabra: BORRAR");
+    if (userInput === "BORRAR") {
         localStorage.removeItem('prode_state');
         state.user = { nick: '', email: '' };
         state.prediction = JSON.parse(JSON.stringify(initialStructure));
@@ -382,6 +383,9 @@ document.getElementById('btn-clear-db').onclick = () => {
         renderBracket('user-bracket', false);
         renderBracket('real-bracket', true);
         updateRanking();
+        alert("Todos los datos han sido eliminados correctamente.");
+    } else if (userInput !== null) {
+        alert("Operación cancelada. La palabra ingresada no es correcta.");
     }
 };
 
