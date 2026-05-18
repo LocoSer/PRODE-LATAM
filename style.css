@@ -3,7 +3,7 @@
     --card-bg: rgba(15, 20, 25, 0.85); /* Un poco más oscuro para que contraste bien con el fondo brillante */
     --primary: #66fcf1;
     --primary-hover: #45a29e;
-    --text-main: #c5c6c7;
+    --text-main: #ffffff; /* Cambiado a blanco puro para máxima nitidez */
     --text-light: #ffffff;
     --accent: #f2a900;
     --danger: #ff4c4c;
@@ -208,9 +208,10 @@ input:focus {
     cursor: pointer;
     transition: all 0.2s ease;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Ligeramente más grande */
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     min-height: 44px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* Sombra para que resalte nítido */
 }
 
 .player:last-child {
