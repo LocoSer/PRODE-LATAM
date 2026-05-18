@@ -18,11 +18,11 @@
 
 body {
     background-color: var(--bg-color);
-    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('bg-aoe2.png');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('bg-aoe2.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    /* Oscurecido un 45% con un gradiente negro para no molestar la vista */
+    /* Oscurecido un 75% con un gradiente negro para no molestar la vista */
     color: var(--text-main);
     font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
