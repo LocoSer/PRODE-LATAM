@@ -475,6 +475,52 @@ function updateRanking() {
         tr.innerHTML = `<td colspan="3" style="text-align: center; opacity: 0.5;">No hay predicciones subidas todavía.</td>`;
         tbody.appendChild(tr);
     }
+    
+    renderAdminParticipants();
+}
+
+function renderAdminParticipants() {
+    const list = document.getElementById('admin-participants-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    if (state.submissions.length === 0) {
+        list.innerHTML = '<li style="color: #aaa; text-align: center; padding: 1rem; font-family: \'Rajdhani\', sans-serif;">No hay participantes cargados.</li>';
+        return;
+    }
+
+    state.submissions.forEach((sub, index) => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.padding = '0.5rem';
+        li.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        li.style.fontFamily = "'Rajdhani', sans-serif";
+        
+        const info = document.createElement('span');
+        info.textContent = `${sub.nick} (${sub.email})`;
+        info.style.color = 'var(--text-light)';
+        info.style.fontSize = '1.1rem';
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '❌';
+        delBtn.style.background = 'none';
+        delBtn.style.border = 'none';
+        delBtn.style.cursor = 'pointer';
+        delBtn.style.fontSize = '1.2rem';
+        delBtn.title = "Eliminar predicción";
+        delBtn.onclick = () => {
+            if (confirm(`¿Estás seguro de borrar la predicción de ${sub.nick}?`)) {
+                state.submissions.splice(index, 1);
+                saveState();
+            }
+        };
+
+        li.appendChild(info);
+        li.appendChild(delBtn);
+        list.appendChild(li);
+    });
 }
 
 // Init
