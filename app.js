@@ -45,7 +45,7 @@ const roundsLayout = [
 ];
 
 let state = {
-    user: { nick: '', email: '' },
+    user: { nick: '', email: '', country: '' },
     prediction: JSON.parse(JSON.stringify(initialStructure)),
     realResults: JSON.parse(JSON.stringify(initialStructure)),
     submissions: [] 
@@ -65,6 +65,7 @@ function loadState() {
     }
     document.getElementById('user-nick').value = state.user.nick;
     document.getElementById('user-email').value = state.user.email;
+    document.getElementById('user-country').value = state.user.country || '';
 }
 
 function saveState() {
@@ -325,10 +326,11 @@ document.getElementById('btn-admin').onclick = () => {
 
 document.getElementById('user-nick').oninput = (e) => { state.user.nick = e.target.value; saveState(); };
 document.getElementById('user-email').oninput = (e) => { state.user.email = e.target.value; saveState(); };
+document.getElementById('user-country').onchange = (e) => { state.user.country = e.target.value; saveState(); };
 
 document.getElementById('btn-download').onclick = () => {
-    if (!state.user.nick || !state.user.email) {
-        alert("Por favor, completa tu Nick y Email antes de descargar.");
+    if (!state.user.nick || !state.user.email || !state.user.country) {
+        alert("Por favor, completa tu Nick, Email y País antes de descargar tu predicción.");
         return;
     }
     
@@ -342,6 +344,7 @@ document.getElementById('btn-download').onclick = () => {
     const exportData = {
         nick: state.user.nick,
         email: state.user.email,
+        country: state.user.country,
         prediction: state.prediction
     };
     
@@ -392,12 +395,13 @@ document.getElementById('btn-clear-db').onclick = () => {
     const userInput = prompt("¡PELIGRO! Vas a borrar TODA la base de datos (predicciones, usuarios y ranking).\n\nPara confirmar esta acción, escribe exactamente la palabra: BORRAR");
     if (userInput === "BORRAR") {
         localStorage.removeItem('prode_state');
-        state.user = { nick: '', email: '' };
+        state.user = { nick: '', email: '', country: '' };
         state.prediction = JSON.parse(JSON.stringify(initialStructure));
         state.realResults = JSON.parse(JSON.stringify(initialStructure));
         state.submissions = [];
         document.getElementById('user-nick').value = '';
         document.getElementById('user-email').value = '';
+        document.getElementById('user-country').value = '';
         document.getElementById('upload-status').textContent = '';
         renderBracket('user-bracket', false);
         renderBracket('real-bracket', true);
@@ -437,6 +441,7 @@ function updateRanking() {
         return {
             nick: sub.nick,
             email: sub.email,
+            country: sub.country || 'OTRO',
             points: points,
             perfect: perfectMatches
         };
@@ -444,15 +449,22 @@ function updateRanking() {
     
     rankingData.sort((a, b) => b.points - a.points);
     
+    const flagMap = {
+        'AR': '🇦🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'MX': '🇲🇽', 
+        'PE': '🇵🇪', 'UY': '🇺🇾', 'VE': '🇻🇪', 'ES': '🇪🇸', 'US': '🇺🇸', 'OTRO': '🏳️'
+    };
+    
     rankingData.forEach((row, index) => {
         const tr = document.createElement('tr');
         if (index === 0) tr.className = 'podium-1';
         else if (index === 1) tr.className = 'podium-2';
         else if (index === 2) tr.className = 'podium-3';
         
+        const flag = flagMap[row.country] || '🏳️';
+        
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${row.nick}</td>
+            <td>${flag} ${row.nick}</td>
             <td>${row.points} pts <small style="opacity: 0.6;">(${row.perfect} perfectos)</small></td>
         `;
         tbody.appendChild(tr);
