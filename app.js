@@ -193,12 +193,17 @@ function setScore(s1, s2, isReal) {
     closeScoreModal();
 }
 
-function renderBracket(containerId, isReal) {
+function renderBracket(containerId, isReal, specificPrediction = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
     
-    const currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
+    let currentMatches;
+    if (specificPrediction) {
+        currentMatches = specificPrediction.matches;
+    } else {
+        currentMatches = isReal ? state.realResults.matches : state.prediction.matches;
+    }
 
     roundsLayout.forEach(round => {
         const roundDiv = document.createElement('div');
@@ -224,9 +229,14 @@ function renderBracket(containerId, isReal) {
 
             const matchDiv = document.createElement('div');
             matchDiv.className = 'match';
-            // Open modal on click instead of direct win
-            matchDiv.style.cursor = 'pointer';
-            matchDiv.onclick = () => openScoreModal(matchId, isReal);
+            
+            // Only make it interactive if not viewing someone else's prediction
+            if (!specificPrediction) {
+                matchDiv.style.cursor = 'pointer';
+                matchDiv.onclick = () => openScoreModal(matchId, isReal);
+            } else {
+                matchDiv.style.cursor = 'default';
+            }
 
             // P1
             const p1Div = document.createElement('div');
@@ -490,6 +500,9 @@ function updateRanking() {
                 <span style="background: rgba(255, 76, 76, 0.15); border: 1px solid rgba(255,76,76,0.3); color: #ff4c4c; padding: 0.4rem 1rem; border-radius: 8px; font-weight: bold; font-size: 1.3rem;">${row.misses}</span>
             </td>
             <td style="text-align: right; font-size: 2.2rem; font-family: 'Teko', sans-serif; color: var(--primary); text-shadow: 0 0 10px rgba(102, 252, 241, 0.4);">${row.points}</td>
+            <td style="width: 50px; text-align: center;">
+                <button onclick="viewParticipant('${row.email}', true)" style="background:none; border:none; cursor:pointer; font-size: 1.5rem; transition: transform 0.2s;" title="Ver predicción de ${row.nick}" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">👁️</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -527,6 +540,15 @@ function renderAdminParticipants() {
         info.style.color = 'var(--text-light)';
         info.style.fontSize = '1.1rem';
 
+        const viewBtn = document.createElement('button');
+        viewBtn.textContent = '👁️';
+        viewBtn.style.background = 'none';
+        viewBtn.style.border = 'none';
+        viewBtn.style.cursor = 'pointer';
+        viewBtn.style.fontSize = '1.3rem';
+        viewBtn.title = "Ver predicción";
+        viewBtn.onclick = () => viewParticipant(sub.email, false);
+
         const delBtn = document.createElement('button');
         delBtn.textContent = '❌';
         delBtn.style.background = 'none';
@@ -541,11 +563,40 @@ function renderAdminParticipants() {
             }
         };
 
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.display = 'flex';
+        actionsDiv.style.gap = '1rem';
+        actionsDiv.appendChild(viewBtn);
+        actionsDiv.appendChild(delBtn);
+
         li.appendChild(info);
-        li.appendChild(delBtn);
+        li.appendChild(actionsDiv);
         list.appendChild(li);
     });
 }
+
+let returnToRanking = false;
+function viewParticipant(email, fromRanking = false) {
+    const sub = state.submissions.find(s => s.email === email);
+    if (!sub) return;
+    
+    returnToRanking = fromRanking;
+    document.getElementById('participant-name-view').textContent = sub.nick;
+    
+    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+    document.getElementById('view-participant').classList.remove('hidden');
+    
+    renderBracket('participant-bracket', false, sub.prediction);
+}
+
+window.backToPreviousView = function() {
+    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+    if (returnToRanking) {
+        document.getElementById('view-ranking').classList.remove('hidden');
+    } else {
+        document.getElementById('view-admin').classList.remove('hidden');
+    }
+};
 
 // Init
 loadState();

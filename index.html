@@ -102,6 +102,19 @@
         </section>
     </main>
 
+    <main id="view-participant" class="hidden">
+        <section class="intro">
+            <h2>Predicción de <span id="participant-name-view" style="color: var(--primary);"></span></h2>
+            <button class="secondary-button" style="width: auto; margin-top: 1rem;" onclick="backToPreviousView()">⬅ Volver Atrás</button>
+        </section>
+        
+        <div class="bracket-scroll-container">
+            <div class="bracket-container" id="participant-bracket">
+                <!-- Participant bracket will be rendered here -->
+            </div>
+        </div>
+    </main>
+
     <main id="view-ranking" class="hidden">
         <section class="ranking-panel">
             <h2>Ranking Actualizado</h2>
@@ -115,6 +128,7 @@
                             <th style="text-align: center;">Parciales (1pt)</th>
                             <th style="text-align: center;">Errores (0pts)</th>
                             <th style="text-align: right;">Total</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="ranking-body">
