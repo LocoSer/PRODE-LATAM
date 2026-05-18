@@ -460,24 +460,23 @@ function updateRanking() {
     
     rankingData.sort((a, b) => b.points - a.points);
     
-    const flagMap = {
-        'AR': '🇦🇷', 'BR': '🇧🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'MX': '🇲🇽', 
-        'PE': '🇵🇪', 'UY': '🇺🇾', 'VE': '🇻🇪', 'ES': '🇪🇸', 'US': '🇺🇸', 'OTRO': '🏳️'
-    };
-    
     rankingData.forEach((row, index) => {
         const tr = document.createElement('tr');
         if (index === 0) tr.className = 'podium-1';
         else if (index === 1) tr.className = 'podium-2';
         else if (index === 2) tr.className = 'podium-3';
         
-        const flag = flagMap[row.country] || '🏳️';
+        let flagHtml = `<span style="font-size: 2.2rem;">🏳️</span>`;
+        if (row.country && row.country !== 'OTRO') {
+            const code = row.country.toLowerCase();
+            flagHtml = `<img src="https://flagcdn.com/40x30/${code}.png" alt="${row.country}" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.8); width: 40px; height: 30px; object-fit: cover;">`;
+        }
         
         tr.innerHTML = `
             <td style="font-size: 1.5rem; font-weight: bold; width: 60px;">#${index + 1}</td>
             <td>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${flag}</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    ${flagHtml}
                     <span style="font-size: 1.5rem; font-family: 'Teko', sans-serif; letter-spacing: 1px;">${row.nick}</span>
                 </div>
             </td>
