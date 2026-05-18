@@ -430,7 +430,6 @@ function updateRanking() {
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td>${row.nick}</td>
-            <td>${row.email}</td>
             <td>${row.points} pts <small style="opacity: 0.6;">(${row.perfect} perfectos)</small></td>
         `;
         tbody.appendChild(tr);
@@ -438,7 +437,7 @@ function updateRanking() {
     
     if (rankingData.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="4" style="text-align: center; opacity: 0.5;">No hay predicciones subidas todavía.</td>`;
+        tr.innerHTML = `<td colspan="3" style="text-align: center; opacity: 0.5;">No hay predicciones subidas todavía.</td>`;
         tbody.appendChild(tr);
     }
 }
